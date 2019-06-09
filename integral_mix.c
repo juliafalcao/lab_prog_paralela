@@ -25,18 +25,18 @@ int main(int argc, char **argv) {
     MPI_Comm_size(MPI_COMM_WORLD, &np);
 
     h = (b - a) / n;
-	n_local = n / np;
+    n_local = n / np;
     int resto = n % np;
     a_local = a + my_rank * n_local * h;
     b_local = a_local + n_local * h;
     
     integral = calcula(a_local, b_local, n_local, h);
     
-    if (my_rank < resto) {
-    	a_local = (n - resto) * h + my_rank * h;
-    	b_local = a_local + h;
-    	integral_resto = calcula(a_local, b_local, 1, h);
-    	integral += integral_resto;
+    if(my_rank < resto){
+        a_local = (n - resto) * h + my_rank * h;
+        b_local = a_local + h;
+        integral_resto = calcula(a_local, b_local, 1, h);
+        integral += integral_resto;
     }
 
     if (my_rank == 0) {
@@ -60,42 +60,14 @@ int main(int argc, char **argv) {
 }
 
 float calcula(float a_local, float b_local, int n_local, float h) {
-    float integral;
-    float x;
+    float result;
     int i;
-    int n_threads = 4;
-    int n_local_thread = n_local / n_threads;
-    int resto = n_local % n_threads;
+    #pragma omp parallel for reduction(+:result)
+        for(i=1; i < n_local; i++) result += f(a_local + i*h);
 
-    integral = (f(a_local) + f(b_local)) / 2.0;
+        result = (result + .5*(f(a_local) + f(b_local)))*h;
 
-
-    #pragma omp parallel num_threads(n_threads) reduction(+:integral)
-    {
-    	int id_thread = omp_get_thread_num();
-	    x = a_local + h * id_thread;
-
-        for (i = 0; i <= n_local_thread; i++) { // a parte de cada thread
-            x += h;
-            integral += f(x);
-        }
-	    
-	    if (id_thread < resto) { // resto
-            float a_local_resto = (n_local - resto + id_thread) * h;
-            float b_local_resto = a_local_resto + h;
-            integral = (f(a_local_resto) + f(b_local_resto)) / 2.0;
-
-            x = a_local_resto;
-    		x += h;
-    		integral += f(x);
-	    }
-
-        integral *= h;
-
-    }
-
-
-    return integral;
+    return result;
 }
 
 float f(float x) {
