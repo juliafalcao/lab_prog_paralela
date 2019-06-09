@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
     
     integral = calcula(a_local, b_local, n_local, h);
     
-    if(my_rank < resto) {
+    if (my_rank < resto) {
     	a_local = (n - resto) * h + my_rank * h;
     	b_local = a_local + h;
     	integral_resto = calcula(a_local, b_local, 1, h);
@@ -62,32 +62,39 @@ int main(int argc, char **argv) {
 float calcula(float a_local, float b_local, int n_local, float h) {
     float integral;
     float x;
-    int n_threads = 4, i;
-    int n_local_threads = n_local / n_threads;
+    int i;
+    int n_threads = 4;
+    int n_local_thread = n_local / n_threads;
     int resto = n_local % n_threads;
 
     integral = (f(a_local) + f(b_local)) / 2.0;
 
 
     #pragma omp parallel num_threads(n_threads) reduction(+:integral)
-    {	
+    {
     	int id_thread = omp_get_thread_num();
-    	for (i = 1; i <= n_local_threads; i++) {
-	    	x = a_local + h * id_thread * i;
-	    	integral += f(x);
-	    }
+	    x = a_local + h * id_thread;
+
+        for (i = 0; i <= n_local_thread; i++) { // a parte de cada thread
+            x += h;
+            integral += f(x);
+        }
 	    
-	    if(id_thread < resto){
-	    	printf("Entrou no if\n");
-	    	float a_local_resto = (n_local - resto) * h + id_thread * h;
-    		float b_local_resto = a_local_resto + h;
-    		x = a_local_resto + h * id_thread;
+	    if (id_thread < resto) { // resto
+            float a_local_resto = (n_local - resto + id_thread) * h;
+            float b_local_resto = a_local_resto + h;
+            integral = (f(a_local_resto) + f(b_local_resto)) / 2.0;
+
+            x = a_local_resto;
+    		x += h;
     		integral += f(x);
 	    }
 
+        integral *= h;
+
     }
 
-    integral *= h;
+
     return integral;
 }
 
