@@ -8,7 +8,7 @@ float f(float x); // função a integrar
 int main(int argc, char **argv) {
     int my_rank, np; // rank e número de processos
     float a = 0.0, b = 1.0; // intervalo
-    int n = 1074; // número de trapezoides
+    int n = 1024; // número de trapezoides
     float h; // base do trapezoide
     float a_local, b_local; // intervalo local
     int n_local; // número de trapezoides no local

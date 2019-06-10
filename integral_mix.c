@@ -8,7 +8,7 @@ float f(float x); // função a integrar
 int main(int argc, char **argv) {
     int my_rank, np; // rank e número de processos
     float a = 0.0, b = 1.0; // intervalo
-    int n = 1074; // número de trapezoides
+    int n = 1024; // número de trapezoides
     float h; // base do trapezoide
     float a_local, b_local; // intervalo local
     int n_local; // número de trapezoides no local
@@ -65,7 +65,7 @@ float calcula(float a_local, float b_local, int n_local, float h) {
     #pragma omp parallel for reduction(+:result)
         for(i=1; i < n_local; i++) result += f(a_local + i*h);
 
-        result = (result + .5*(f(a_local) + f(b_local)))*h;
+        result = (result + (f(a_local) + f(b_local)))*h;
 
     return result;
 }
