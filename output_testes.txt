@@ -1,0 +1,80 @@
+$ echo MPI, 4 PROCESSOS, 1024 TRAPÉZIOS
+MPI, 4 PROCESSOS, 1024 TRAPÉZIOS
+
+$ time mpiexec -np 4 ./integral_mpi
+Resultado: 0.335164
+
+real    0m0.043s
+user    0m0.000s
+sys     0m0.094s
+
+$ mpicc -o integral_mpi mpi/integral.c
+
+$ echo MPI, 4 PROCESSOS, 1024^3 TRAPÉZIOS
+MPI, 4 PROCESSOS, 1024^3 TRAPÉZIOS
+
+$ time mpiexec -np 4 ./integral_mpi
+
+^C[mpiexec@JULIA-PC] Sending Ctrl-C to processes as requested
+[mpiexec@JULIA-PC] Press Ctrl-C again to force abort
+
+real    2m3.933s
+user    8m12.797s
+sys     0m0.250s
+
+$ echo MPI COM 4 PROCESSOS E 1024^3 TRAPÉZIOS NÃO RODA
+MPI COM 4 PROCESSOS E 1024^3 TRAPÉZIOS NÃO RODA
+
+$ echo OPENMP, 4 THREADS, 1024 TRAPÉZIOS
+OPENMP, 4 THREADS, 1024 TRAPÉZIOS
+
+$ gcc -o integral_omp openmp/integral_sem_pi.c -fopenmp
+
+$ export OMP_NUM_THREADS=4
+
+$ gcc -o integral_omp openmp/integral_sem_pi.c -fopenmp
+
+$ time ./integral_omp
+Integral: 0.333821
+
+real    0m0.007s
+user    0m0.000s
+sys     0m0.000s
+
+$ echo OPENMP, 4 THREADS, 1024^3 TRAPÉZIOS
+OPENMP, 4 THREADS, 1024^3 TRAPÉZIOS
+
+$ gcc -o integral_omp openmp/integral_sem_pi.c -fopenmp
+
+$ time ./integral_omp
+Integral: 0.036133
+
+real    0m2.460s
+user    0m9.781s
+sys     0m0.000s
+
+$ echo INTEGRAL COM MPI E OPENMP, 2 PROCESSOS E 2 THREADS, 1024 TRAPÉZIOS
+INTEGRAL COM MPI E OPENMP, 2 PROCESSOS E 2 THREADS, 1024 TRAPÉZIOS
+
+$ mpicc -o integral_mix integral_mix.c -fopenmp
+
+$ export OMP_NUM_THREADS=2
+
+$ time mpiexec -np 2 ./integral_mix
+Resultado: 0.334066
+
+real    0m0.043s
+user    0m0.000s
+sys     0m0.047s
+
+$ echo INTEGRAL COM MPI E OPENMP, 2 PROCESSOS E 2 THREADS, 1024^3 TRAPÉZIOS
+INTEGRAL COM MPI E OPENMP, 2 PROCESSOS E 2 THREADS, 1024^3 TRAPÉZIOS
+
+$ mpicc -o integral_mix integral_mix.c -fopenmp
+
+$ time mpiexec -np 2 ./integral_mix
+Resultado: 0.036133
+
+real    0m2.084s
+user    0m8.156s
+sys     0m0.078s

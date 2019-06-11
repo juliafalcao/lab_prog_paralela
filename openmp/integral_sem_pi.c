@@ -1,11 +1,7 @@
 #include <stdio.h>
 
 float f(float x) {
-    float fx; // retorno
-
-    fx = x * x; // exemplo: função quadrática
-
-    return fx;
+    return x*x; // exemplo: função quadrática
 }
 	
 void main() {
@@ -14,12 +10,13 @@ void main() {
 	int n = 1024;
 	double h;
     float integral;
-    h = (b - a)/n;
-    printf("h: %f\n", h);
-    #pragma omp parallel for reduction(+:integral)
-		for(int i=1; i<n; i++) integral += f(a + i*h);
+    h = (b - a) / n;
 
-		integral = (integral + (f(a) + f(b)))*h;
+    #pragma omp parallel for reduction(+:integral)
+		for (int i = 1; i < n; i++)
+			integral += f(a + i*h);
+
+		integral = (integral + (f(a) + f(b))) * h;
 
 	printf("Integral: %f\n", integral);
 }

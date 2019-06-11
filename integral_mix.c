@@ -8,7 +8,7 @@ float f(float x); // função a integrar
 int main(int argc, char **argv) {
     int my_rank, np; // rank e número de processos
     float a = 0.0, b = 1.0; // intervalo
-    int n = 1024; // número de trapezoides
+    int n = 1024*1024*1024; // número de trapezoides
     float h; // base do trapezoide
     float a_local, b_local; // intervalo local
     int n_local; // número de trapezoides no local
@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
     
     integral = calcula(a_local, b_local, n_local, h);
     
-    if(my_rank < resto){
+    if (my_rank < resto) {
         a_local = (n - resto) * h + my_rank * h;
         b_local = a_local + h;
         integral_resto = calcula(a_local, b_local, 1, h);
@@ -52,9 +52,7 @@ int main(int argc, char **argv) {
         MPI_Send(&integral, 1, MPI_FLOAT, dest, tag, MPI_COMM_WORLD);
     }
 
-
     if (my_rank == 0) printf("Resultado: %f\n", total);
-   
    
     MPI_Finalize();
 }
@@ -62,18 +60,16 @@ int main(int argc, char **argv) {
 float calcula(float a_local, float b_local, int n_local, float h) {
     float result;
     int i;
-    #pragma omp parallel for reduction(+:result)
-        for(i=1; i < n_local; i++) result += f(a_local + i*h);
 
-        result = (result + (f(a_local) + f(b_local)))*h;
+    #pragma omp parallel for reduction(+:result)
+        for (i = 1; i < n_local; i++)
+            result += f(a_local + i*h);
+
+        result = (result + (f(a_local) + f(b_local))) * h;
 
     return result;
 }
 
 float f(float x) {
-    float fx; // retorno
-
-    fx = x * x; // exemplo: função quadrática
-
-    return fx;
+    return x*x; // exemplo: fnção quadrática
 }

@@ -79,7 +79,7 @@ float calcula(float a_local, float b_local, float n_local, float h) {
 float f(float x) {
     float fx; // retorno
 
-    fx = x * x; // exemplo: função quadrática
+    fx = x*x; // exemplo: função quadrática
 
     return fx;
 }
